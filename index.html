@@ -70,12 +70,12 @@
 <script>
     // Firebase設定
     const firebaseConfig = {
-          apiKey: "AIzaSyBRxpG9UatX25XpXr5lJEVF4Fjs9b0pvek",
-          authDomain: "live-9006a.firebaseapp.com",
-          projectId: "live-9006a",
-          storageBucket: "live-9006a.appspot.com",
-          messagingSenderId: "338141132109",
-          appId: "1:338141132109:web:9a7ac189057eb3c3b23304"
+        apiKey: "AIzaSyBRxpG9UatX25XpXr5lJEVF4Fjs9b0pvek",
+        authDomain: "live-9006a.firebaseapp.com",
+        projectId: "live-9006a",
+        storageBucket: "live-9006a.appspot.com",
+        messagingSenderId: "338141132109",
+        appId: "1:338141132109:web:9a7ac189057eb3c3b23304"
     };
 
     // Firebase初期化
@@ -102,18 +102,23 @@
             const rows = text.split('\n').slice(1); // ヘッダー行をスキップ
             rows.forEach(row => {
                 const columns = row.split(',');
-                if (columns.length === 5) { // カラム数を5に設定
+                if (columns.length >= 5) { // 必要なカラムが5つ以上あることを確認
                     const productInfo = {
-                        productId: columns[0],
-                        productName: columns[1],
-                        price: columns[2],
-                        imageUrl: columns[3],
-                        detailUrl: columns[4]
+                        productId: columns[0].trim(), // 商品番号
+                        productName: columns[1].trim(), // 商品名
+                        price: columns[2].trim(), // 価格
+                        imageUrl: columns[3].trim(), // トップ画像URL
+                        detailUrl: columns[4].trim()  // 詳細URL
                     };
                     // Firestoreにデータを保存
                     db.collection("products").add(productInfo).then(() => {
+                        console.log("Firestoreにデータを追加しました:", productInfo);
                         addProductRow(productInfo.productId, productInfo.productName, productInfo.price, productInfo.imageUrl, productInfo.detailUrl);
+                    }).catch((error) => {
+                        console.error("Firestoreへの追加中にエラーが発生しました:", error); // エラー処理
                     });
+                } else {
+                    console.warn("カラム数が不正な行:", row); // カラムが不足している場合の警告
                 }
             });
         };
@@ -167,4 +172,3 @@
 
 </body>
 </html>
-
