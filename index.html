@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商品リスト</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -64,17 +66,31 @@
 </div>
 
 <input type="file" id="csvFileInput" accept=".csv">
+
 <script>
-    // ページ読み込み時にローカルストレージからデータを読み込む
-    window.onload = function() {
-        const savedData = localStorage.getItem('productData');
-        if (savedData) {
-            const rows = JSON.parse(savedData);
-            rows.forEach(row => {
-                addProductRow(row.productId, row.productName, row.price, row.imageUrl, row.detailUrl);
-            });
-        }
+    // Firebase設定
+    const firebaseConfig = {
+          apiKey: "AIzaSyBRxpG9UatX25XpXr5lJEVF4Fjs9b0pvek",
+          authDomain: "live-9006a.firebaseapp.com",
+          projectId: "live-9006a",
+          storageBucket: "live-9006a.appspot.com",
+          messagingSenderId: "338141132109",
+          appId: "1:338141132109:web:9a7ac189057eb3c3b23304"
     };
+
+    // Firebase初期化
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Firestoreからデータを読み込む
+    function loadProductsFromFirestore() {
+        db.collection("products").get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                addProductRow(data.productId, data.productName, data.price, data.imageUrl, data.detailUrl);
+            });
+        });
+    }
 
     // CSVファイルの読み込み
     document.getElementById('csvFileInput').addEventListener('change', function(event) {
@@ -84,8 +100,6 @@
         reader.onload = function(e) {
             const text = e.target.result;
             const rows = text.split('\n').slice(1); // ヘッダー行をスキップ
-            const productData = [];
-
             rows.forEach(row => {
                 const columns = row.split(',');
                 if (columns.length === 5) { // カラム数を5に設定
@@ -96,13 +110,12 @@
                         imageUrl: columns[3],
                         detailUrl: columns[4]
                     };
-                    addProductRow(productInfo.productId, productInfo.productName, productInfo.price, productInfo.imageUrl, productInfo.detailUrl);
-                    productData.push(productInfo); // ローカルストレージ用に保存
+                    // Firestoreにデータを保存
+                    db.collection("products").add(productInfo).then(() => {
+                        addProductRow(productInfo.productId, productInfo.productName, productInfo.price, productInfo.imageUrl, productInfo.detailUrl);
+                    });
                 }
             });
-
-            // ローカルストレージにデータを保存
-            localStorage.setItem('productData', JSON.stringify(productData));
         };
 
         reader.readAsText(file);
@@ -145,7 +158,13 @@
 
         container.appendChild(productRow);
     }
+
+    // 初回ロード時にFirestoreからデータを取得
+    window.onload = function() {
+        loadProductsFromFirestore();
+    };
 </script>
 
 </body>
 </html>
+
