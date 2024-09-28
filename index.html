@@ -65,6 +65,17 @@
 
 <input type="file" id="csvFileInput" accept=".csv">
 <script>
+    // ページ読み込み時にローカルストレージからデータを読み込む
+    window.onload = function() {
+        const savedData = localStorage.getItem('productData');
+        if (savedData) {
+            const rows = JSON.parse(savedData);
+            rows.forEach(row => {
+                addProductRow(row.productId, row.productName, row.price, row.imageUrl, row.detailUrl);
+            });
+        }
+    };
+
     // CSVファイルの読み込み
     document.getElementById('csvFileInput').addEventListener('change', function(event) {
         const file = event.target.files[0];
@@ -73,13 +84,25 @@
         reader.onload = function(e) {
             const text = e.target.result;
             const rows = text.split('\n').slice(1); // ヘッダー行をスキップ
+            const productData = [];
 
             rows.forEach(row => {
                 const columns = row.split(',');
                 if (columns.length === 5) { // カラム数を5に設定
-                    addProductRow(columns[0], columns[1], columns[2], columns[3], columns[4]);
+                    const productInfo = {
+                        productId: columns[0],
+                        productName: columns[1],
+                        price: columns[2],
+                        imageUrl: columns[3],
+                        detailUrl: columns[4]
+                    };
+                    addProductRow(productInfo.productId, productInfo.productName, productInfo.price, productInfo.imageUrl, productInfo.detailUrl);
+                    productData.push(productInfo); // ローカルストレージ用に保存
                 }
             });
+
+            // ローカルストレージにデータを保存
+            localStorage.setItem('productData', JSON.stringify(productData));
         };
 
         reader.readAsText(file);
@@ -126,5 +149,3 @@
 
 </body>
 </html>
-
-
