@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品リスト</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        .product-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .product-row img {
+            width: 100px;
+            height: auto;
+        }
+        .product-info {
+            flex-grow: 1;
+            margin-left: 20px;
+        }
+        .product-info h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .product-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .add-memo {
+            background-color: #007bff;
+            color: white;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .product-info a {
+            text-decoration: none;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="product-container">
+    <!-- 商品情報はJavaScriptで動的に挿入されます -->
+</div>
+
+<input type="file" id="csvFileInput" accept=".csv">
+<script>
+    // CSVファイルの読み込み
+    document.getElementById('csvFileInput').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const rows = text.split('\n').slice(1); // ヘッダー行をスキップ
+
+            rows.forEach(row => {
+                const columns = row.split(',');
+                if (columns.length === 5) { // カラム数を5に設定
+                    addProductRow(columns[0], columns[1], columns[2], columns[3], columns[4]);
+                }
+            });
+        };
+
+        reader.readAsText(file);
+    });
+
+    // 商品行を追加する関数
+    function addProductRow(productId, productName, price, imageUrl, detailUrl) {
+        const container = document.getElementById('product-container');
+        
+        const productRow = document.createElement('div');
+        productRow.classList.add('product-row');
+        
+        // 商品の画像
+        const productImage = document.createElement('img');
+        productImage.src = imageUrl;
+        productImage.alt = '商品画像';
+
+        const productInfo = document.createElement('div');
+        productInfo.classList.add('product-info');
+        const productNameLink = document.createElement('a');
+        productNameLink.href = detailUrl;
+        productNameLink.target = '_blank';
+        productNameLink.textContent = productName;
+        const productNameHeading = document.createElement('h3');
+        productNameHeading.appendChild(productNameLink);
+        const productPrice = document.createElement('p');
+        productPrice.textContent = '価格: ' + price;
+
+        productInfo.appendChild(productNameHeading);
+        productInfo.appendChild(productPrice);
+
+        const memoLink = document.createElement('a');
+        memoLink.href = '#';
+        memoLink.classList.add('add-memo');
+        memoLink.textContent = 'メモを追加する';
+
+        productRow.appendChild(productImage); // 画像を商品行に追加
+        productRow.appendChild(productInfo);
+        productRow.appendChild(memoLink);
+
+        container.appendChild(productRow);
+    }
+</script>
+
+</body>
+</html>
