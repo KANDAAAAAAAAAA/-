@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商品リスト</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    
+    <!-- Firebase SDKの読み込み (古いバージョンを使用してエラーハンドリング) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -79,7 +82,7 @@
     };
 
     // Firebase初期化
-    const app = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     // Firestoreからデータを読み込む
@@ -102,7 +105,7 @@
             const rows = text.split('\n').slice(1); // ヘッダー行をスキップ
             rows.forEach(row => {
                 const columns = row.split(',');
-                if (columns.length >= 5) { // 必要なカラムが5つ以上あることを確認
+                if (columns.length >= 5) { // カラムが5つ以上あることを確認
                     const productInfo = {
                         productId: columns[0].trim(), // 商品番号
                         productName: columns[1].trim(), // 商品名
@@ -117,8 +120,6 @@
                     }).catch((error) => {
                         console.error("Firestoreへの追加中にエラーが発生しました:", error); // エラー処理
                     });
-                } else {
-                    console.warn("カラム数が不正な行:", row); // カラムが不足している場合の警告
                 }
             });
         };
